@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="initial-scale=1.0, width=device-width">
+	<title>도서 관리</title>
+
+<!-- 제이쿼리 모바일, 제이쿼리 라이브러리 파일 -->
+	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css"/>
+	<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<!-- 사용자 정의 자바스크립트 파일 -->
+<script src="project.js"></script>
+<script>
+	$(document).ready( function() {
+		// DB 연결
+		openDB();
+		createTable();
+		// 이벤트 함수 정의
+	 	$('#submit1').click( function() {
+	 		insertBook();
+		});
+		$('#cancel1').click( function() {
+			$('#bookType1').val('미정').attr('selected', 'selected');
+			$('#bookType1').selectmenu('refresh');
+		});
+		$('#cancel1').click( function() {
+			$('#bookdate1').val('미정').attr('selected', 'selected');
+			$('#bookdate1').selectmenu('refresh');
+		});
+		$('#search2').click( function() {
+		  var name = $('#sBookName2').val();
+		  selectBook2(name);
+		});
+		$('#submit2').click( function() {
+		  updateBook();
+		});
+		$('#cancel2').click( function() {
+			$('#bookType2').val('미정').attr('selected', 'selected');
+			$('#bookType2').selectmenu('refresh');
+		});
+		$('#cancel2').click( function() {
+			$('#bookdate2').val('미정').attr('selected', 'selected');
+			$('#bookdate2').selectmenu('refresh');
+		});
+		$('#search3').click( function() {
+		  var name = $('#sBookName3').val();
+		  selectBook3(name);
+		});
+		$('#submit3').click( function() {
+		  deleteBook();
+		});
+		$('#search4').click( function() {
+		  var name = $('#sBookName4').val();
+		  selectBook4(name);
+		});
+
+		$('#first').click( function() {
+		  position='first';
+		  listBook();
+		});
+		$('#prev').click( function() {
+		  position='prev';
+		  listBook();
+		});
+		$('#next').click( function() {
+		  position='next';
+		  listBook();
+		});
+		$('#last').click( function() {
+		  position='last';
+		  	listBook();
+		});
+	});
+</script>
+<style type="text/css">
+  img {width : 100%; height : 200px;}
+  .gap { padding-top : 15px; padding-bottom: 30px; }
+</style>
+</head>
+<body>
+
+<!-- 시작 화면 -->
+  <div data-role="page" id="page0">
+	<div data-role="header" data-position="fixed" data-theme="b">
+		<h1>나만의 웹툰 저장소</h1>
+		<a href="#page0" data-icon="home" data-iconpos="notext" class="ui-btn-right">Home</a>
+	</div>
+	<div data-role="content">
+		<img src="book.jpg">
+		<ul data-role="listview" data-inset="true">
+			<li><a href="#page1">웹툰 정보 추가</a></li>
+			<li><a href="#page2">웹툰 정보 갱신</a></li>
+			<li><a href="#page3">웹툰 정보 삭제</a></li>
+			<li><a href="#page4">웹툰 조회</a></li>
+		</ul>
+	</div>
+	<div data-role="footer" data-position="fixed" data-theme="b">
+		<h4>1905026 임진식</h4>
+    </div>
+  </div>
+
+ <!-- 도서정보 추가 화면 -->
+  <div data-role="page" id="page1">
+	<div data-role="header" data-position="fixed" data-theme="b">
+		<a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+		<h1>나만의 웹툰 저장소</h1>
+		<a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page1">입력</a></li>
+				<li><a href="#page2">수정</a></li>
+				<li><a href="#page3">삭제</a></li>
+				<li><a href="#page4">전체검색</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="content">
+		<form name="form1">
+			<h3>내가 본 웹툰 평가 입력</h3>
+			<div class="ui-body ui-body-a gap">
+				<label for="bookType1" class="select">별점:</label>
+				<select name="bookType1" id="bookType1" data-native-menu="false" data-mini="true" data-inline="true">
+					<option vlaue="미정">미정</option>
+					<option value="★">★</option>
+					<option value="★★">★★</option>
+					<option value="★★★">★★★</option>
+					<option value="★★★★">★★★★</option>
+					<option value="★★★★★">★★★★★</option>
+				</select>
+				<label for="bookdate1" class="select">요일:</label>
+				<select name="bookdate1" id="bookdate1" data-native-menu="false" data-mini="true" data-inline="true">
+					<option vlaue="미정">미정</option>
+					<option vlaue="월요일">월요일</option>
+					<option value="화요일">화요일</option>
+					<option value="수요일">수요일</option>
+					<option value="목요일">목요일</option>
+					<option value="금요일">금요일</option>
+				</select>
+				<label for="BookName1">웹툰명:</label>
+				<input type="text" name="bookName1" id="bookName1" value="" data-mini="true"/>
+				<label for="Bookscr1">싸이트 주소:</label>           <!-- 현재 보는 웹툰의 주소를 저장해두고 바로바로 복사하여 사용할수 있겟끔 햇습니다. 다음에는 링크형식으로 바로 들어갈수 있게 만들어 보겠습니다.-->
+				<input type="text" name="bookscr1" id="bookscr1" value="" data-mini="true"/>
+				<label for="Bookimg1">추가할 이미지 폴더 명:</label>  <!-- 파일을 업로드 받는 형식으로 시도 해보 았으나.. 현재 실력으로는 어떻게 해야할지 몰라서 가라형식으로 일딴 만들어 보았습니다.-->
+				<input type="text" name="bookimg1" id="bookimg1" value="" data-mini="true" multiple/>
+            </div>
+			<div class="ui-body">
+				<fieldset class="ui-grid-a">
+					<div class="ui-block-a">
+	              	<input type="reset" id="cancel1" value="취소"/>
+					</div>
+					<div class="ui-block-b">
+	              	<input type="button" id="submit1" value="추가"/>
+					</div>
+				</fieldset>
+			</div>
+		</form>
+	</div>
+	<div data-role="footer" data-position="fixed" data-theme="b">
+		<h4>1905026 임진식</h4>
+    </div>
+  </div>
+
+ <!-- 도서정보 갱신 화면 -->
+  <div data-role="page" id="page2">
+	<div data-role="header" data-position="fixed" data-theme="b">
+		<a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+		<h1>나만의 웹툰 저장소</h1>
+		<a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page1">입력</a></li>
+				<li><a href="#page2">수정</a></li>
+				<li><a href="#page3">삭제</a></li>
+				<li><a href="#page4">전체검색</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="content">
+		<form name="form2">
+			<h3>내가 본 웹툰 평가 수정</h3>
+			<div class="ui-body ui-body-a gap">
+				<label for="sBookName2">검색 웹툰명:</label>
+				<input type="search" name="sBookName2" id="sBookName2" value="" data-mini="true"/>
+				<label for="bookType2" class="select">별점:</label>
+				<select name="bookType2" id="bookType2" data-native-menu="false" data-mini="true" data-inline="true">
+					<option vlaue="미정">미정</option>
+					<option value="★">★</option>
+					<option value="★★">★★</option>
+					<option value="★★★">★★★</option>
+					<option value="★★★★">★★★★</option>
+					<option value="★★★★★">★★★★★</option>
+				</select>
+				<label for="bookdate2" class="select">요일:</label>
+				<select name="bookdate2" id="bookdate2" data-native-menu="false" data-mini="true" data-inline="true">
+					<option vlaue="미정">미정</option>
+					<option vlaue="월요일">월요일</option>
+					<option value="화요일">화요일</option>
+					<option value="수요일">수요일</option>
+					<option value="목요일">목요일</option>
+					<option value="금요일">금요일</option>
+				</select>
+				 <label for="bookName2">웹툰명:</label>
+				 <input type="text" name="bookName2" id="bookName2" value="" data-mini="true"  />
+				 <label for="Bookscr2">싸이트 주소:</label>
+ 				 <input type="text" name="bookscr2" id="bookscr2" value="" data-mini="true"/>
+         <label for="Bookimg2">추가할 이미지 폴더 명:</label>
+ 				 <input type="text" name="bookimg2" id="bookimg2" value="" data-mini="true"/>
+            </div>
+			<div class="ui-body">
+				<fieldset class="ui-grid-b">
+					<div class="ui-block-a">
+    	                <input type="reset" id="cancel2" value="취소"/>
+					</div>
+					<div class="ui-block-b">
+		                <input type="button" id="submit2" value="수정"/>
+					</div>
+					<div class="ui-block-c">
+		                <input type="button" id="search2" value="검색"/>
+					</div>
+				</fieldset>
+			</div>
+		</form>
+	</div>
+	<div data-role="footer" data-position="fixed" data-theme="b">
+		<h4>1905026 임진식</h4>
+    </div>
+  </div>
+
+<!-- 도서정보 삭제 화면 -->
+  <div data-role="page" id="page3">
+	<div data-role="header" data-position="fixed" data-theme="b">
+		<a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+		<h1>나만의 웹툰 저장소</h1>
+		<a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page1">입력</a></li>
+				<li><a href="#page2">수정</a></li>
+				<li><a href="#page3">삭제</a></li>
+				<li><a href="#page4">전체검색</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="content">
+		<form name="form3">
+			<h3>내가 본 웹툰 평가 삭제</h3>
+			<div class="ui-body ui-body-a gap">
+				<label for="sBookName3">검색 웹툰명:</label>
+				<input type="search" name="sBookName3" id="sBookName3" value="" data-mini="true" />
+				<label for="bookType3">별점:</label>
+				<input type="text" name="bookType3" id="bookType3" value="" data-mini="true"/>
+				<label for="bookdate3">요일:</label>
+				<input type="text" name="bookdate3" id="bookdate3" value="" data-mini="true"/>
+				<label for="bookName3" >웹툰명:</label>
+				<input type="text" name="bookName3" id="bookName3" value="" data-mini="true"  />
+				<label for="bookscr3" >싸이트 주소:</label>
+				<input type="text" name="bookscr3" id="bookscr3" value="" data-mini="true"  />
+        <label for="bookimg3" >추가할 이미지 폴더 명:</label>
+				<input type="text" name="bookimg3" id="bookimg3" value="" data-mini="true"  />
+			</div>
+			<div class="ui-body">
+				<fieldset class="ui-grid-b">
+					<div class="ui-block-a">
+                 	<input type="reset" id="cancel3" value="취소"/>
+					</div>
+					<div class="ui-block-b">
+                    <input type="button" id="submit3" value="삭제"/>
+					</div>
+					<div class="ui-block-c">
+                    <input type="button" id="search3" value="검색"/>
+					</div>
+				</fieldset>
+			</div>
+		</form>
+	</div>
+	<div data-role="footer" data-position="fixed" data-theme="b">
+		<h4>1905026 임진식</h4>
+    </div>
+  </div>
+
+<!-- 전체 도서조회 화면 -->
+  <div data-role="page" id="page4">
+	<div data-role="header" data-position="fixed" data-theme="b">
+		<a href="#" data-icon="back" data-rel="back" data-direction="reverse">Back</a>
+		<h1>나만의 웹툰 저장소</h1>
+		<a href="#page0" data-icon="home" data-iconpos="notext">Home</a>
+		<div data-role="navbar">
+			<ul>
+				<li><a href="#page1">입력</a></li>
+				<li><a href="#page2">수정</a></li>
+				<li><a href="#page3">삭제</a></li>
+				<li><a href="#page4">전체검색</a></li>
+			</ul>
+		</div>
+	</div>
+	<div data-role="content">
+		<h3>내가 본 웹툰 전체검색</h3>
+		<div class="ui-body ui-body-a gap">
+			<fieldset data-role="controlgroup" data-type="horizontal" style="text-align:right">
+            	<input type="button" id="first" value="|<"/>
+                <input type="button" id="prev" value="<"/>
+                <input type="button" id="next" value=">"/>
+                <input type="button" id="last" value=">|"/>
+            </fieldset>
+			<label for="sBookName4">검색 웹툰명:</label>
+			<input type="search" name="sBookName4" id="sBookName4" value="" data-mini="true" />
+			<label for="bookType4">별점:</label>
+			<input type="text" name="bookType4" id="bookType4" value="" data-mini="true"/>
+			<label for="bookdate4">요일:</label>
+			<input type="text" name="bookdate4" id="bookdate4" value="" data-mini="true"/>
+			<label for="bookName4">웹툰명:</label>
+			<input type="text" name="bookName4" id="bookName4" value="" data-mini="true"/>
+			<label for="bookscr4">싸이트 주소:</label>
+			<input type="text" name="bookscr4" id="bookscr4" value="" data-mini="true"/>
+      <label for="bookimg4">추가할 이미지 폴더 명:</label>
+      <input type="text" name="bookimg4" id="bookimg4" value="" data-mini="true"  />
+			<img id="view" src="" alt="">
+
+    </div>
+		<div class="ui-body">
+			<fieldset class="ui-grid-a">
+				<div class="ui-block-a">
+			       <input type="reset" id="cancel4" value="취소"/>
+				</div>
+				<div class="ui-block-b">
+			       <input type="button" id="search4" value="검색"/>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+	<div data-role="footer" data-position="fixed" data-theme="b">
+		<h4>1905026 임진식</h4>
+    </div>
+  </div>
+</body>
+</html>
